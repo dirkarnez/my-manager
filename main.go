@@ -75,28 +75,31 @@ func main() {
 		log.Fatalf("Failed to parse YAML: %v", err)
 	}
 
-	ntpTime, err := ntp.Time("time.google.com")
-	if err != nil {
-		fmt.Println(err)
-	}
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
 
-	fmt.Println(ntpTime)
+	for range ticker.C {
+		ntpTime, err := ntp.Time("time.google.com")
+		if err != nil {
+			fmt.Println(err)
+		}
 
-	timer := time.NewTicker(1 * time.Second)
-	// Access the parsed todos
-	for {
-		// Wait for the timer to tick
-		<-timer.C
-
+		var s = false
 		for _, todo := range todos.Todos {
+			fmt.Println(ntpTime, "-", todo.StartTime, "-", todo.EndTime)
+
 			if ntpTime.After(todo.StartTime) && ntpTime.Before(todo.EndTime) {
 				fmt.Println("You should be doing:", todo.Title)
+				s = true
 			}
 			// // fmt.Println("Title:", todo.Title)
 			// fmt.Println("Start Time:", todo.StartTime)
 			// // fmt.Println("End Time:", todo.EndTime)
 			// fmt.Println()
 		}
-	}
 
+		if !s {
+			fmt.Println("Nothing")
+		}
+	}
 }
