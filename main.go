@@ -67,13 +67,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to read YAML file: %v", err)
 	}
-		ntpTime, err := ntp.Time("time.google.com")
-		if err != nil {
-			fmt.Println(err)
-		}
 
-	if end.Sub(start).Abs().Seconds() > 60 {
-		}
+	ntpTime, err := ntp.Time("time.google.com")
+	if err != nil {
+		fmt.Println(err)
+	}
+	timeDifference := time.Since(ntpTime).Abs().Seconds()
+	fmt.Println("Google time", ntpTime, "system time", time.Now(), "time difference in seconds", timeDifference)
+	if timeDifference > 60 {
+		log.Fatalln("inaccurate time")
+	}
+
 	// Parse the YAML file
 	var todos TodoList
 	err = yaml.Unmarshal(yamlFile, &todos)
@@ -86,12 +90,11 @@ func main() {
 
 	for range ticker.C {
 
-
 		var s = false
 		for _, todo := range todos.Todos {
-			fmt.Println(ntpTime, "-", todo.StartTime, "-", todo.EndTime)
+			fmt.Println(time.Now(), "-", todo.StartTime, "-", todo.EndTime)
 
-			if ntpTime.After(todo.StartTime) && ntpTime.Before(todo.EndTime) {
+			if time.Now().After(todo.StartTime) && time.Now().Before(todo.EndTime) {
 				fmt.Println("You should be doing:", todo.Title)
 				s = true
 			}
