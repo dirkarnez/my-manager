@@ -67,7 +67,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to read YAML file: %v", err)
 	}
+		ntpTime, err := ntp.Time("time.google.com")
+		if err != nil {
+			fmt.Println(err)
+		}
 
+	if end.Sub(start).Abs().Seconds() > 60 {
+		}
 	// Parse the YAML file
 	var todos TodoList
 	err = yaml.Unmarshal(yamlFile, &todos)
@@ -79,10 +85,7 @@ func main() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		ntpTime, err := ntp.Time("time.google.com")
-		if err != nil {
-			fmt.Println(err)
-		}
+
 
 		var s = false
 		for _, todo := range todos.Todos {
